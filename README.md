@@ -161,4 +161,24 @@ Con esas líneas de comando, estamos:
 * Verificamos que se haya configurado correctamente.
 * Guardamos.
 
-Ahora volvemos a GNS3, hacemos doble clic en el equipo PC1, y nos dirigirá a la consola del equipo.
+Ahora volvemos a GNS3, le damos clic derecho a el equipo PC1 y lo iniciamos. Hacemos doble clic en el equipo, y nos dirigirá a la consola.
+
+<p align="center">
+  <img src="images/image-11.png" alt="Consola del PC1">
+</p>
+
+Le vamos a asignar una IP con un default gateway.
+
+```
+show ip 
+ip address 192.168.1.2 255.255.255.0 192.168.1.1
+ping 192.168.1.1
+```
+
+Con esas líneas de comando, estamos:
+
+* Mostrando la Ip del dispositivo (No tiene).
+* Le asignamos una con una máscara y el default gateway del router.
+* Hacemos ping al servidor para ver si se conectó correctamente.
+
+## Configuración del código del proyecto
