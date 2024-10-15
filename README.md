@@ -1,6 +1,6 @@
 # Instalación y ejecución del programa
 
-<!-- > [!WARNING] -->
+> [!WARNING]
 > Procure seguir las instrucciones paso a paso.
 
 ## Programas usados:
@@ -81,3 +81,84 @@ Cuando hagamos clic en 'Terminar', se abrirá la máquina y comenzará la instal
 <p align="center">
   <img src="images/image-5.png" alt="Crear máquina virtual">
 </p>
+ 
+## Configuración del programa en GNS3
+
+Dentro del programa creamos un proyecto y para la configuración, hay que seguir tres pasos:
+
+* Crear un router.
+* Añadir las máquinas virtuales.
+* Programar el proyecto.
+
+### Crear un router
+
+Creamos un nuevo 'Template' y seleccionamos la opción que dice 'Manually create new template'. En la barra de la izquierda, seleccionamos la opción 'IOS routers'. Hacemos clic en 'New' y dejamos todo por defecto.
+
+<p align="center">
+  <img src="images/image-6.png" alt="Creación c3660">
+</p>
+
+Cuando ya esté creadO , hacemos clic en 'Apply' y luego en 'OK'.
+
+### Añadir máquinas virtuales
+
+Creamos un nuevo 'Template' y seleccionamos la opción que dice 'Manually create new template'. En la barra de la izquierda, seleccionamos la opción 'VirtualBox VMs'. Hacemos clic en 'New' y el programa reconocerá automáticamente las máquinas virtuales. Seleccionamos el servidor y el cliente.
+
+<p align="center">
+  <img src="images/image-7.png" alt="Añadir máquinas">
+</p>
+
+Cuando ya estén creadas las máquinas, hacemos clic en 'Apply' y luego en 'OK'.
+
+### Programar el proyecto
+
+Primero, debemos entrar a GNS3 para configurar el adaptador de red de ambas máquinas. Seleccionamos la máquina, entramos en configuración, ponemos el modo 'Expert' y nos dirigimos a Red. Ahí, en 'Conectado a', seleccionamos NAT.
+
+<p align="center">
+  <img src="images/image-8.png" alt="Configuración NAT">
+</p>
+
+> [!IMPORTANT]
+> Hacer esto con ambas maquinas antes de los siguientes pasos.
+
+Después de configurar la red de las máquinas, nos dirigimos a GNS3. En la barra lateral izquierda, seleccionamos el tercer ícono que contiene todos los dispositivos. Arrastramos a la plantilla el router creado, las máquinas virtuales, un switch y un VPCS. Los conectamos de la siguiente forma:
+
+<p align="center">
+  <img src="images/image-9.png" alt="Plantilla del proyecto en GNS3">
+</p>
+
+Para hacer la conexión, debemos seleccionar el último ícono y hacer clic desde el dispositivo hacia el switch, y luego seleccionar el puerto.
+
+**Ahora debemos configurar el router**
+
+Hacemos clic derecho en el router y seleccionamos la opción 'Start'. Después de que inicie, volvemos a hacer clic derecho y seleccionamos la opción de 'Consola'.
+
+Dentro de la consola damos enter para iniciar.
+
+<p align="center">
+  <img src="images/image-10.png" alt="Consola del router">
+</p>
+
+Ahora vamos a configurar una interfaz de red del router, en este caso, la primera. Para eso, debemos usar las siguientes líneas.
+
+```
+show ip interface brief
+configure terminal
+interface FastEthernet0/0
+no shutdown
+ip address 192.168.1.1 255.255.255.0
+end
+show ip interface brief
+wr
+```
+
+Con esas líneas de comando, estamos:
+
+* Mostrando las interfaces de red del router.
+* Accediendo a la configuración de la primera interfaz.
+* La encendemos.
+* Le asignamos una IP con su máscara.
+* Verificamos que se haya configurado correctamente.
+* Guardamos.
+
+Ahora volvemos a GNS3, hacemos doble clic en el equipo PC1, y nos dirigirá a la consola del equipo.
