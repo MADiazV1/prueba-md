@@ -31,13 +31,13 @@ Además, debemos descargar una imagen para poder hacer algunas configuraciones d
 > El archivo se puede encontrar en la carpeta Documentos-Utiles.
 
 Para no tener problemas, el archivo debe guardarse en la siguiente dirección:
-```
+ ```
 C:
 └── Usuarios
     └── <su_usuario>
         └── GNS3
             └── imagenes
-                └── IOS
+               └── IOS
 ```
 
 Aquí finaliza la instalación de GNS3.
@@ -112,7 +112,7 @@ Cuando ya estén creadas las máquinas, hacemos clic en 'Apply' y luego en 'OK'.
 
 ### Programar el proyecto
 
-Primero, debemos entrar a GNS3 para configurar el adaptador de red de ambas máquinas. Seleccionamos la máquina, entramos en configuración, ponemos el modo 'Expert' y nos dirigimos a Red. Ahí, en 'Conectado a', seleccionamos NAT.
+Primero, debemos entrar a VirtualBox para configurar el adaptador de red de ambas máquinas. Seleccionamos la máquina, entramos en configuración, ponemos el modo 'Expert' y nos dirigimos a Red. Ahí, en 'Conectado a', seleccionamos NAT.
 
 <p align="center">
   <img src="images/image-8.png" alt="Configuración NAT">
@@ -182,3 +182,99 @@ Con esas líneas de comando, estamos:
 * Hacemos ping al servidor para ver si se conectó correctamente.
 
 ## Configuración del código del proyecto
+
+> [!IMPORTANT]
+> Hacer el mismo procedimiento con ambas máquinas virtuales (cliente y servidor).
+
+Accedemos a una de las máquinas virtuales. Entramos en la terminal y ejecutamos los siguientes comandos:
+
+> [!NOTE]
+> Estos comando sirven para el sistema operativo Ubuntu.
+
+Debemos de instalar las siguientes dependencia en la máquina:
+* vim
+* git
+* gcc
+* g++
+* CUnit
+* CUnit-devel
+* pkg-config
+* python3
+* cmake
+
+```
+sudo apt update
+sudo apt install -y vim git gcc g++ libcunit1 libcunit1-dev pkg-config cmake python3 python3-venv python3-dev
+```
+
+Debemos de clonar el repositorio en donde esta el programa. Y accedemos a la siguiente branch.
+
+```
+git clone https://github.com/julianvb03/DHCPv4.git
+git checkout julian/dev
+cd ./DHCPv4
+```
+
+Estando en la carpeta del programa, ejecutaremos los siguientes comandos para compilarlo.
+
+```
+cmake -S. -Bbuild
+cd ./build
+make
+cd bin
+```
+
+```
+DHCPv4:
+└── build
+    └── bin
+        └── client.out
+        └── server.out
+```
+
+Ahora tenemos ambos programas en ambas máquinas.
+
+Cerramos la máquina, debemos entrar a VirtualBox para configurar el adaptador de red de ambas máquinas. Seleccionamos la máquina, entramos en configuración, ponemos el modo 'Expert' y nos dirigimos a Red. Ahí, en 'Conectado a', seleccionamos No conectado.
+
+<p align="center">
+  <img src="images/image-12.png" alt="No conectado">
+</p>
+
+### Ejecución del proyecto
+
+Nos dirigimos a GNS3 y hacemos clic en 'Start' en la parte superior del programa. Esto iniciará el router, el PC1 y las máquinas virtuales de forma automática. En las máquinas virtuales, procedemos a hacer lo siguiente en ambas máquinas:
+
+```
+sudo pkill dhclient
+sudo systemctl stop NetworkManager
+sudo systemctl stop firewalld
+sudo systemctl disable firewalld
+```
+
+Con esas líneas de comando, estamos:
+* Desactivando cualquier proceso automático de DHCP.
+* Desactivando cualquier cambio o manejo automático de interfaces de red por parte de NetworkManager.
+* Desactivando temporalmente el firewall.
+* Evitando que el firewall se active de forma automática.
+
+> [!CAUTION]
+> Los siguientes comandos solo se usan en la terminal del servidor.
+> Se le asiganrá una IP estática y su gateway.
+
+````
+sudo ip addr add 192.168.1.2/24 dev enp0s3
+sudo ip route add default via 192.168.1.1
+````
+
+#### Ejecución
+
+Accedemos a la carpeta 'bin' en ambas terminales de las máquinas.
+```
+DHCPv4:
+└── build
+    └── bin
+        └── client.out
+        └── server.out
+```
+
+En la máquina del servidor, ejecutamos server.out y luego, en la terminal del cliente, ejecutamos cliente.out.
