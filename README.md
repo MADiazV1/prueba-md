@@ -54,10 +54,16 @@ Dejamos toda la instalación por defecto y tendríamos VirtualBox instalado.
 
 ## Instalación de la máquinas virtuales
 
-Debemos descargar una imagen, que sería el archivo ISO de nuestro sistema operativo. En este caso, usaremos Ubuntu. Nos dirigimos [la página página principal de Ubuntu](https://ubuntu.com/download/desktop) y seleccionamos el botón que dice 'Download 24.04.1 LTS.'
+Debemos descargar una imagen, que sería el archivo ISO de nuestro sistema operativo. En este caso, usaremos Rocky Linux. Nos dirigimos [la página página principal de Rocky](https://rockylinux.org/es/download).
 
 <p align="center">
-  <img src="images/image-3.png" alt="Página de descarga Ubuntu">
+  <img src="images/image-3.png" alt="Página de descarga Rocky">
+</p>
+
+Vamos a descargar el Boot ISO.
+
+<p align="center">
+  <img src="images/image-3.1.png" alt="Página de descarga BootISO">
 </p>
 
 Para crear las máquinas virtuales, debemos ingresar a VirtualBox y hacer clic en el botón 'Nueva'.
@@ -73,7 +79,7 @@ En la pestaña 'Nombre y Sistema Operativo', debemos configurarlo de la siguient
 > - En 'Hardware' se recomienda usar 4 CPUs.
 > - En 'Disco duro' se puede dejar por defecto.
 
-Cuando hagamos clic en 'Terminar', se abrirá la máquina y comenzará la instalación del sistema operativo. Cuando finalice, reinicia la máquina.
+Cuando hagamos clic en 'Terminar', se abrirá la máquina y comenzará la instalación del sistema operativo. Cuando finalice la instalación, reinicia la máquina.
 
 > [!NOTE]
 > Debe hacer este proceso dos veces, ya que necesitamos una máquina para el 'Cliente' y otra para el 'Servidor'.
@@ -81,7 +87,7 @@ Cuando hagamos clic en 'Terminar', se abrirá la máquina y comenzará la instal
 <p align="center">
   <img src="images/image-5.png" alt="Crear máquina virtual">
 </p>
- 
+
 ## Configuración del programa en GNS3
 
 Dentro del programa creamos un proyecto y para la configuración, hay que seguir tres pasos:
@@ -92,7 +98,7 @@ Dentro del programa creamos un proyecto y para la configuración, hay que seguir
 
 ### Crear un router
 
-Creamos un nuevo 'Template' y seleccionamos la opción que dice 'Manually create new template'. En la barra de la izquierda, seleccionamos la opción 'IOS routers'. Hacemos clic en 'New' y dejamos todo por defecto.
+Creamos un nuevo 'Template' y seleccionamos la opción que dice 'Manually create new template'. En la barra de la izquierda, seleccionamos la opción 'IOS routers'. Hacemos clic en 'New', seleccionamos la imagen que anteriormente debiamos descargar que se encuentra en la capeta 'Documentos-Utiles' y dejamos todo los demás por defecto.
 
 <p align="center">
   <img src="images/image-6.png" alt="Creación c3660">
@@ -121,13 +127,13 @@ Primero, debemos entrar a VirtualBox para configurar el adaptador de red de amba
 > [!IMPORTANT]
 > Hacer esto con ambas maquinas antes de los siguientes pasos.
 
-Después de configurar la red de las máquinas, nos dirigimos a GNS3. En la barra lateral izquierda, seleccionamos el tercer ícono que contiene todos los dispositivos. Arrastramos a la plantilla el router creado, las máquinas virtuales, un switch y un VPCS. Los conectamos de la siguiente forma:
+Después de configurar la red de las máquinas, nos dirigimos a GNS3. En la barra lateral izquierda, seleccionamos el tercer ícono que contiene todos los dispositivos. Arrastramos a la plantilla el router creado, las máquinas virtuales, un switch y un VPCS para pruebas. Los conectamos de la siguiente forma:
 
 <p align="center">
   <img src="images/image-9.png" alt="Plantilla del proyecto en GNS3">
 </p>
 
-Para hacer la conexión, debemos seleccionar el último ícono y hacer clic desde el dispositivo hacia el switch, y luego seleccionar el puerto.
+Para hacer la conexión, debemos seleccionar el último ícono de la barra de opciones de la izquierda (la que tiene forma de cable) y hacer clic desde el dispositivo hacia el switch, y luego seleccionar el puerto.
 
 **Ahora debemos configurar el router**
 
@@ -181,6 +187,8 @@ Con esas líneas de comando, estamos:
 * Le asignamos una con una máscara y el default gateway del router.
 * Hacemos ping al servidor para ver si se conectó correctamente.
 
+Si si el VPCS se conecta con el servidor correctamente, significa que no deberiamos tener inconveniente con la conexión de las maquinas virtuales.
+
 ## Configuración del código del proyecto
 
 > [!IMPORTANT]
@@ -203,8 +211,9 @@ Debemos de instalar las siguientes dependencia en la máquina:
 * cmake
 
 ```
-sudo apt update
-sudo apt install -y vim git gcc g++ libcunit1 libcunit1-dev pkg-config cmake python3 python3-venv python3-dev
+sudo dnf update -y
+sudo dnf config-manager --set-enabled crb
+sudo dnf install -y vim git gcc gcc-c++ CUnit CUnit-devel pkg-config cmake
 ```
 
 Debemos de clonar el repositorio en donde esta el programa. Y accedemos a la siguiente branch.
@@ -234,7 +243,7 @@ DHCPv4:
 
 Ahora tenemos ambos programas en ambas máquinas.
 
-Cerramos la máquina, debemos entrar a VirtualBox para configurar el adaptador de red de ambas máquinas. Seleccionamos la máquina, entramos en configuración, ponemos el modo 'Expert' y nos dirigimos a Red. Ahí, en 'Conectado a', seleccionamos No conectado.
+Cerramos las máquinas y debemos entrar a VirtualBox para configurar el adaptador de red de ambas máquinas. Seleccionamos la máquina, entramos en configuración, ponemos el modo 'Expert' y nos dirigimos a Red. Ahí, en 'Conectado a', seleccionamos No conectado.
 
 <p align="center">
   <img src="images/image-12.png" alt="No conectado">
@@ -246,6 +255,7 @@ Nos dirigimos a GNS3 y hacemos clic en 'Start' en la parte superior del programa
 
 ```
 sudo pkill dhclient
+sudo pkill dhcpcd
 sudo systemctl stop NetworkManager
 sudo systemctl stop firewalld
 sudo systemctl disable firewalld
@@ -278,3 +288,16 @@ DHCPv4:
 ```
 
 En la máquina del servidor, ejecutamos server.out y luego, en la terminal del cliente, ejecutamos cliente.out.
+
+En el cliente usamos:
+
+```
+cd ./DHCPV4/build/bin
+sudo ./client.out
+```
+
+En el servidor usamos:
+```
+cd ./DHCPV4/build/bin
+sudo ./server.out enp0s3
+```
